@@ -10,6 +10,7 @@ import java.util.ArrayList;
 public class CT437_HashFunction1 {
     static String alphabet = "abcdefghijklmnopqrstuvwxyABCDEFGHIJKLMNOPQURTUVWXYZ0123456789";
 
+
     public static void main(String[] args) {
         int res = 0;
         String s = "abb";
@@ -30,42 +31,34 @@ public class CT437_HashFunction1 {
                 System.out.println("input = " + args[0] + " : Hash = " + res);
                 System.out.println("Start searching for collisions");
                 /** Problem 1: Looking for collisions */
-                // Brute force using the pattern:
-                //      "a", "b", "c", ... "9"
-                //      "aa", "ab", "ac", ... "99"
-                //      ...
-                //      "aa...a", "aa...b", "aa...c", ... "99...9" (length 64)
-                // Over the characters: "abc...zABC...Z012...9"
-//
+                // Create a list to store the collisions
                 ArrayList<String> collisions = new ArrayList<String>();
-                int targetHash = hashF1(args[0]);
-//                getAllPermutations(alphabet, "");
-                System.out.println(hashF1(args[0]));
-                int limitPerStringLength = 2;
-                int totalLimit = 20;
-                for(int length = 1; length <= alphabet.length(); length++) {
-                    System.out.println("Checking all strings of length: " + length);
-                    checkAllPermutationsOfLength( "",  length, collisions, targetHash, limitPerStringLength*length);
-                    System.out.println("Collisions found so far: " + collisions.size());
 
-                    // Furthermore
-                    if(collisions.size() == totalLimit) break;
+                // This is the hash value for which we are trying to find collisions
+                int targetHash = hashF1(args[0]);
+
+                // There can be lots of collisions, e.g. for “Bamb0”:
+                // #collisions of length 2 = 20
+                // #collisions of length 3 = 1962
+                // #collisions of length 4 = 121552
+                // Out of interest, this can be used to limit the number of collisions of each length
+                // If you do not want to use a limit, set this to -1
+                // This is used within the recursive function
+                int limitPerStringLength = 3;
+
+                // This is the total number of collisions we want to find
+                // This is to prevent a memory overflow
+                // If you do not want to use a limit, set this to -1
+                // This is used in the for loop below
+                int totalLimit = 50;
+
+                // Iterate over different string lengths, from 1 to 64
+                for(int length = 1; length <= 64; length++) {
+                    System.out.println("Checking all strings of length: " + length);
+                    checkAllPermutationsOfLength( "",  length, collisions, targetHash, limitPerStringLength*length, totalLimit);
+                    System.out.println("Collisions found so far: " + collisions.size());
                 }
 
-
-//                for(int len = 1; len <= 64; len++) {
-//                    // Initial combination is "aa...a" of length len
-//                    char[] currentCombination = Strings.repeat(alphabet.charAt(0), len).toCharArray();
-//
-//                    // Point to the end of the string - this will cycle the character through the alphabet
-//                    int currentRotator = currentCombination.length-1;
-//
-//                    // Iterating from the end of the string to the start
-//                    while (currentRotator >= 0) {
-//                        // Iterate over the alphabet at that point
-//                        currentRotator--;
-//                    }
-//                }
             }
         }
         else { // No <input> 
@@ -73,7 +66,7 @@ public class CT437_HashFunction1 {
         } 
     }
 
-    private static void checkAllPermutationsOfLength(String newStringHolder, int length, ArrayList<String> collisions, int targetHash, int collisionLimit)
+    private static void checkAllPermutationsOfLength(String newStringHolder, int length, ArrayList<String> collisions, int targetHash, int collisionLimit, int totalLimit)
     {
         /** Extra recursion base case
          * collisionLimit = positive integer:
@@ -84,10 +77,12 @@ public class CT437_HashFunction1 {
          *      used if we do not want to set a limit
          *      collisions.size() can never be -1, so the condition is skipped
          * */
-        if(collisions.size() == collisionLimit) {
+        if(collisions.size() == collisionLimit || collisions.size() == totalLimit) {
             return;
         }
         if (length == 0) {
+            // We have reached a base case here
+            // Check is this string a collision, and add it to the list if it is
             if(hashF1(newStringHolder) == targetHash){
                 System.out.println("Collision found: " + newStringHolder);
                 collisions.add(newStringHolder);
@@ -97,7 +92,7 @@ public class CT437_HashFunction1 {
         for (int i = 0; i < alphabet.length(); i++) {
             String newSequence;
             newSequence = newStringHolder + alphabet.charAt(i);
-            checkAllPermutationsOfLength(newSequence, length - 1, collisions, targetHash, collisionLimit);
+            checkAllPermutationsOfLength(newSequence, length - 1, collisions, targetHash, collisionLimit, totalLimit);
         }
     }
 
