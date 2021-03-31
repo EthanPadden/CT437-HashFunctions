@@ -41,10 +41,15 @@ public class CT437_HashFunction1 {
                 int targetHash = hashF1(args[0]);
 //                getAllPermutations(alphabet, "");
                 System.out.println(hashF1(args[0]));
+                int limitPerStringLength = 2;
+                int totalLimit = 20;
                 for(int length = 1; length <= alphabet.length(); length++) {
                     System.out.println("Checking all strings of length: " + length);
-                    checkAllPermutationsOfLength(alphabet, "", alphabet.length(), length, collisions, targetHash);
+                    checkAllPermutationsOfLength(alphabet, "", alphabet.length(), length, collisions, targetHash, limitPerStringLength*length);
                     System.out.println("Collisions found so far: " + collisions.size());
+
+                    // Furthermore
+                    if(collisions.size() == totalLimit) break;
                 }
 
 
@@ -68,8 +73,20 @@ public class CT437_HashFunction1 {
         } 
     }
 
-    private static void checkAllPermutationsOfLength(String alphabet, String newStringHolder, int intitialAlphabetLength, int length, ArrayList<String> collisions, int targetHash)
+    private static void checkAllPermutationsOfLength(String alphabet, String newStringHolder, int intitialAlphabetLength, int length, ArrayList<String> collisions, int targetHash, int collisionLimit)
     {
+        /** Extra recursion base case
+         * collisionLimit = positive integer:
+         *      used if we want a limit to the number of collisions we want to find
+         *      assumes that the collisions argument is initially passed to the recursive function as an empty list
+         *      the size will eventually reach the limits upon finding sufficient collisions (if they exist)
+         * collisionLimit = -1:
+         *      used if we do not want to set a limit
+         *      collisions.size() can never be -1, so the condition is skipped
+         * */
+        if(collisions.size() == collisionLimit) {
+            return;
+        }
         if (length == 0) {
             if(hashF1(newStringHolder) == targetHash){
                 System.out.println("Collision found: " + newStringHolder);
@@ -80,7 +97,7 @@ public class CT437_HashFunction1 {
         for (int i = 0; i < intitialAlphabetLength; i++) {
             String newSequence;
             newSequence = newStringHolder + alphabet.charAt(i);
-            checkAllPermutationsOfLength(alphabet, newSequence, intitialAlphabetLength, length - 1, collisions, targetHash);
+            checkAllPermutationsOfLength(alphabet, newSequence, intitialAlphabetLength, length - 1, collisions, targetHash, collisionLimit);
         }
     }
 //   private static void getAllPermutations(String left, String right, String target, int targetHash, ArrayList<String> collisions)
