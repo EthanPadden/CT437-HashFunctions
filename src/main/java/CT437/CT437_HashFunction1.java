@@ -100,26 +100,53 @@ public class CT437_HashFunction1 {
             checkAllPermutationsOfLength(alphabet, newSequence, intitialAlphabetLength, length - 1, collisions, targetHash, collisionLimit);
         }
     }
-//   private static void getAllPermutations(String left, String right, String target, int targetHash, ArrayList<String> collisions)
-//    {
-//        // Recursive termination
-//        if (left.length() == 0) {
-//            if(hashF1(right) == targetHash && right.toString().compareTo(target) != 0) {
-//                collisions.add(right);
-//            }
-//            return;
-//        }
-//
-//        for (int i = 0; i < left.length(); i++) {
-//            char currentCharacter = left.charAt(i);
-//
-//            // Remainder of string
-//            String remainder = left.substring(0, i) + left.substring(i + 1);
-//
-//            getAllPermutations(remainder, right + currentCharacter, target, targetHash, collisions);
-//        }
-//    }
 
+    private static int hashF2(String s){
+        int ret = -1, i;
+        int[] hashA = new int[]{1, 1, 1, 1};
+
+        // Initialise filler to empty string
+        String filler = "", sIn;
+        String alphabet = "abcdefghijklmnopqrstuvwxyABCDEFGHIJKLMNOPQURTUVWXYZ0123456789";
+
+
+        if ((s.length() > 64) || (s.length() < 1)) { // String does not have required length
+            ret = -1;
+        }
+        else {
+            int targetFillerLength = 64 - s.length();
+
+            int j = 0;
+            while (filler.length() < targetFillerLength) {
+                // Get the int
+                int byPos = s.charAt(j % s.length()) % alphabet.length();
+                // Manipulate?
+                char letterToAdd = alphabet.charAt(byPos);
+                filler += letterToAdd;
+                j++;
+            }
+
+            sIn = s + filler; // Add characters, now have "<input>HABCDEF..."
+            sIn = sIn.substring(0, 64); // // Limit string to first 64 characters
+            // System.out.println(sIn); // FYI
+            for (i = 0; i < sIn.length(); i++){
+                char byPos = sIn.charAt(i); // get i'th character
+                hashA[0] += (byPos * 17); // Note: A += B means A = A + B
+                hashA[1] += (byPos * 31);
+                hashA[2] += (byPos * 101);
+                hashA[3] += (byPos * 79);
+            }
+
+            hashA[0] %= 255;  // % is the modulus operation, i.e. division with rest
+            hashA[1] %= 255;
+            hashA[2] %= 255;
+            hashA[3] %= 255;
+
+            ret = hashA[0] + (hashA[1] * 256) + (hashA[2] * 256 * 256) + (hashA[3] * 256 * 256 * 256);
+            if (ret < 0) ret *= -1;
+        }
+        return ret;
+    }
         
     private static int hashF1(String s){
         int ret = -1, i;
