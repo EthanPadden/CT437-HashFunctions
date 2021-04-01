@@ -1,6 +1,7 @@
 package CT437;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 /**
  *
@@ -54,12 +55,13 @@ public class CT437_HashFunction1 {
                 // This is to prevent a memory overflow
                 // If you do not want to use a limit, set this to -1
                 // This is used in the for loop below
-                int totalLimit = 50;
+                int totalLimit = 20;
 
                 // Iterate over different string lengths, from 1 to 64
+                System.out.println("Checking in order...");
                 for (int length = 1; length <= 64; length++) {
                     System.out.println("Checking all strings of length: " + length);
-                    checkAllStringsOfCertainLength("", length, targetHash, limitPerStringLength * length, totalLimit, false);
+                    checkAllStringsOfCertainLength("", length, targetHash, limitPerStringLength * length, totalLimit, true);
 
                     // Preventing the output from repeating
                     if (collisions.size() == totalLimit) {
@@ -68,6 +70,21 @@ public class CT437_HashFunction1 {
                         break;
                     }
                 }
+
+                // Trying random string lengths
+                System.out.println("Checking random string lengths...");
+                Random random = new Random();
+                collisions = new ArrayList<String>();
+                numChecks = 0;
+                limitPerStringLength = 1;
+                for(int i = 1; i <= totalLimit; i++) {
+                    // Choose a random string length
+                    int length = random.nextInt(64 - 1) + 1;
+                    System.out.println("Checking all strings of length: " + length);
+                    checkAllStringsOfCertainLength("", length, targetHash, limitPerStringLength*i, totalLimit, true);
+                }
+                System.out.println("Total collisions found: " + collisions.size());
+                System.out.println("after " + numChecks + " strings checked.");
             }
         }
         else { // No <input> 
