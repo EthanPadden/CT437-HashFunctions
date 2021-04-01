@@ -10,6 +10,7 @@ import java.util.ArrayList;
 public class CT437_HashFunction1 {
     static String alphabet = "abcdefghijklmnopqrstuvwxyABCDEFGHIJKLMNOPQURTUVWXYZ0123456789";
     static ArrayList<String> collisions;
+    static int numChecks;
 
     public static void main(String[] args) {
         int res = 0;
@@ -34,6 +35,9 @@ public class CT437_HashFunction1 {
                 // Create a list to store the collisions
                 collisions = new ArrayList<String>();
 
+                // This keeps track of the number of checks made so we can verify that the enhanced function is better
+                numChecks = 0;
+
                 // This is the hash value for which we are trying to find collisions
                 int targetHash = hashF1(args[0]);
 
@@ -55,11 +59,17 @@ public class CT437_HashFunction1 {
                 // Iterate over different string lengths, from 1 to 64
                 for(int length = 1; length <= 64; length++) {
                     System.out.println("Checking all strings of length: " + length);
-                    checkAllPermutationsOfLength( "",  length,  targetHash, limitPerStringLength*length, totalLimit, false);
-                    System.out.println("Collisions found so far: " + collisions.size());
+                    checkAllPermutationsOfLength( "",  length,  targetHash, limitPerStringLength*length, totalLimit, true);
+//                    System.out.println("Collisions found so far: " + collisions.size());
 
                     // Preventing the output from repeating
-                    if(collisions.size() == totalLimit) break;
+                    if(collisions.size() == totalLimit) {
+                        System.out.println("Collisions found: " +collisions.size());
+                        System.out.println("Checks: " + numChecks);
+                        float collisionPercentage = (((float) collisions.size()) / ((float) numChecks)) * 100;
+                        System.out.println("Collision percentage: " + collisionPercentage + "%");
+                        break;
+                    }
                 }
 
             }
@@ -90,6 +100,8 @@ public class CT437_HashFunction1 {
             if(usingNewFunction) hash = hashF2(newStringHolder);
             else hash = hashF1(newStringHolder);
 
+            numChecks++;
+
             if(hash == targetHash){
                 System.out.println("Collision found: " + newStringHolder);
                 collisions.add(newStringHolder);
@@ -109,7 +121,7 @@ public class CT437_HashFunction1 {
 
         // Initialise filler to empty string
         String filler = "", sIn;
-        String alphabet = "abcdefghijklmnopqrstuvwxyABCDEFGHIJKLMNOPQURTUVWXYZ0123456789";
+        filler = new String("ABCDEFGHABCDEFGHABCDEFGHABCDEFGHABCDEFGHABCDEFGHABCDEFGHABCDEFGH");
 
 
         if ((s.length() > 64) || (s.length() < 1)) { // String does not have required length
@@ -118,18 +130,21 @@ public class CT437_HashFunction1 {
         else {
             int targetFillerLength = 64 - s.length();
 
+
             int j = 0;
+            String fillerToAdd = "";
             while (filler.length() < targetFillerLength) {
                 // Get the int
-                int byPos = s.charAt(j % s.length()) % alphabet.length();
-                // Manipulate?
+                int byPos = s.charAt(j%s.length()) + filler.charAt(j%filler.length());
+
                 char letterToAdd = alphabet.charAt(byPos);
-                filler += letterToAdd;
+                fillerToAdd += letterToAdd;
                 j++;
             }
 
-            sIn = s + filler; // Add characters, now have "<input>HABCDEF..."
-            sIn = sIn.substring(0, 64); // // Limit string to first 64 characters
+
+            sIn = s + fillerToAdd; // Add characters, now have "<input>HABCDEF..."
+//            sIn = sIn.substring(0, 64); // // Limit string to first 64 characters
             // System.out.println(sIn); // FYI
             for (i = 0; i < sIn.length(); i++){
                 char byPos = sIn.charAt(i); // get i'th character
