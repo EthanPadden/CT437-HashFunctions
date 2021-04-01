@@ -1,6 +1,5 @@
 package CT437;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 
 /**
@@ -14,19 +13,11 @@ public class CT437_HashFunction1 {
 
     public static void main(String[] args) {
         int res = 0;
-        String s = "abb";
-        // THIS CONSIDERS ALL PERMUTATIONS - NO NEED FOR OTHER FUNCTION
-//        ArrayList<String> test =  new ArrayList<String>();
-//        checkAllPermutationsOfLength("abcd", "", 3, 3, test);
-//        System.out.println("FOUND: " + test.size());
-
-//        getAllPermutations(s, "", null, 3, new ArrayList<String>());
 
         if (args != null && args.length > 0) { // Check for <input> value
             res = hashF1(args[0]); // call hash function with <input>
             if (res < 0) { // Error
                 System.out.println("Error: <input> must be 1 to 64 characters long.");
-
             }
             else {
                 System.out.println("input = " + args[0] + " : Hash = " + res);
@@ -57,21 +48,17 @@ public class CT437_HashFunction1 {
                 int totalLimit = 50;
 
                 // Iterate over different string lengths, from 1 to 64
-                for(int length = 1; length <= 64; length++) {
+                for (int length = 1; length <= 64; length++) {
                     System.out.println("Checking all strings of length: " + length);
-                    checkAllPermutationsOfLength( "",  length,  targetHash, limitPerStringLength*length, totalLimit, true);
-//                    System.out.println("Collisions found so far: " + collisions.size());
+                    checkAllStringsOfCertainLength("", length, targetHash, limitPerStringLength * length, totalLimit, false);
 
                     // Preventing the output from repeating
-                    if(collisions.size() == totalLimit) {
-                        System.out.println("Collisions found: " +collisions.size());
-                        System.out.println("Checks: " + numChecks);
-                        float collisionPercentage = (((float) collisions.size()) / ((float) numChecks)) * 100;
-                        System.out.println("Collision percentage: " + collisionPercentage + "%");
+                    if (collisions.size() == totalLimit) {
+                        System.out.println("Total collisions found: " + collisions.size());
+                        System.out.println("after " + numChecks + " strings checked.");
                         break;
                     }
                 }
-
             }
         }
         else { // No <input> 
@@ -79,7 +66,7 @@ public class CT437_HashFunction1 {
         } 
     }
 
-    private static void checkAllPermutationsOfLength(String newStringHolder, int length, int targetHash, int collisionLimit, int totalLimit, boolean usingNewFunction)
+    private static void checkAllStringsOfCertainLength(String newStringHolder, int length, int targetHash, int collisionLimit, int totalLimit, boolean usingNewFunction)
     {
         /** Extra recursion base case
          * collisionLimit = positive integer:
@@ -90,19 +77,19 @@ public class CT437_HashFunction1 {
          *      used if we do not want to set a limit
          *      collisions.size() can never be -1, so the condition is skipped
          * */
-        if(collisions.size() == collisionLimit || collisions.size() == totalLimit) {
+        if (collisions.size() == collisionLimit || collisions.size() == totalLimit) {
             return;
         }
         if (length == 0) {
             // We have reached a base case here
             // Check is this string a collision, and add it to the list if it is
             int hash;
-            if(usingNewFunction) hash = hashF2(newStringHolder);
+            if (usingNewFunction) hash = hashF2(newStringHolder);
             else hash = hashF1(newStringHolder);
 
             numChecks++;
 
-            if(hash == targetHash){
+            if (hash == targetHash) {
                 System.out.println("Collision found: " + newStringHolder);
                 collisions.add(newStringHolder);
             }
@@ -111,42 +98,58 @@ public class CT437_HashFunction1 {
         for (int i = 0; i < alphabet.length(); i++) {
             String newSequence;
             newSequence = newStringHolder + alphabet.charAt(i);
-            checkAllPermutationsOfLength(newSequence, length - 1,  targetHash, collisionLimit, totalLimit, usingNewFunction);
+            checkAllStringsOfCertainLength(newSequence, length - 1, targetHash, collisionLimit, totalLimit, usingNewFunction);
         }
     }
 
-    private static int hashF2(String s){
+    private static int hashF2(String s)
+    {
         int ret = -1, i;
-        int[] hashA = new int[]{1, 1, 1, 1};
+        int[] hashA = new int[] { 1, 1, 1, 1 };
 
-        // Initialise filler to empty string
-        String filler = "", sIn;
+        String filler, sIn;
+
         filler = new String("ABCDEFGHABCDEFGHABCDEFGHABCDEFGHABCDEFGHABCDEFGHABCDEFGHABCDEFGH");
-
 
         if ((s.length() > 64) || (s.length() < 1)) { // String does not have required length
             ret = -1;
-        }
-        else {
+        } else {
+            /** In hashF1, for an input string of length N, the same filler gets appended to the end.
+             * This results in the following (using hashA[0] as an example):
+             * sIn = s + filler
+             * ...where s is of length N and filler is of length 64-N. Treating the characters as integers:
+             * hashA[0] = sIn[0]*17 + sIn[1]*17 + ... + sIn[63]*17 mod 255
+             *          = 17(sIn[0] + sIn[1] + ... + sIn[63]) mod 255
+             *          = 17(s[0] + s[1] + ... + s[N-1] + filler[0] + filler[1] + ... + filler[63-N]) mod 255
+             * Since for a fixed N, filler[0] + filler[1] + ... + filler[63-N] is a constant.
+             * So for any N, a collision will occur where s[0] + s[1] + ... + s[N-1] is the same value mod 255.
+             * (Regardless of any processing after, e.g. calculating ret using those values, and the same applies to 31, 101 and 79)
+             * A possible solution is not to have filler[0] + filler[1] + ... + filler[63-N] be a constant,
+             * i.e. vary what is appended depending on the input s.
+             * We can do this by building the filler as below:
+             * */
+
             int targetFillerLength = 64 - s.length();
-
-
             int j = 0;
             String fillerToAdd = "";
+            // Build up the new filler character by character
             while (filler.length() < targetFillerLength) {
-                // Get the int
-                int byPos = s.charAt(j%s.length()) + filler.charAt(j%filler.length());
+                // Take the character at index j of s (mod so that we restart at the beginning)
+                // Take the character at index j of the original filler (mod so that we restart at the beginning)
+                // Add them together to get the character of the new filler
+                int byPos = s.charAt(j % s.length()) + filler.charAt(j % filler.length());
 
                 char letterToAdd = alphabet.charAt(byPos);
                 fillerToAdd += letterToAdd;
                 j++;
             }
 
-
+            // There is no need to truncate this string, because the new filler length was calculated
             sIn = s + fillerToAdd; // Add characters, now have "<input>HABCDEF..."
-//            sIn = sIn.substring(0, 64); // // Limit string to first 64 characters
             // System.out.println(sIn); // FYI
-            for (i = 0; i < sIn.length(); i++){
+
+            /**The rest is the same as hashF1 */
+            for (i = 0; i < sIn.length(); i++) {
                 char byPos = sIn.charAt(i); // get i'th character
                 hashA[0] += (byPos * 17); // Note: A += B means A = A + B
                 hashA[1] += (byPos * 31);
