@@ -55,7 +55,7 @@ public class CT437_HashFunction1 {
                 // Iterate over different string lengths, from 1 to 64
                 for(int length = 1; length <= 64; length++) {
                     System.out.println("Checking all strings of length: " + length);
-                    checkAllPermutationsOfLength( "",  length, collisions, targetHash, limitPerStringLength*length, totalLimit);
+                    checkAllPermutationsOfLength( "",  length, collisions, targetHash, limitPerStringLength*length, totalLimit, false);
                     System.out.println("Collisions found so far: " + collisions.size());
                 }
 
@@ -66,7 +66,7 @@ public class CT437_HashFunction1 {
         } 
     }
 
-    private static void checkAllPermutationsOfLength(String newStringHolder, int length, ArrayList<String> collisions, int targetHash, int collisionLimit, int totalLimit)
+    private static void checkAllPermutationsOfLength(String newStringHolder, int length, ArrayList<String> collisions, int targetHash, int collisionLimit, int totalLimit, boolean usingNewFunction)
     {
         /** Extra recursion base case
          * collisionLimit = positive integer:
@@ -83,7 +83,11 @@ public class CT437_HashFunction1 {
         if (length == 0) {
             // We have reached a base case here
             // Check is this string a collision, and add it to the list if it is
-            if(hashF1(newStringHolder) == targetHash){
+            int hash;
+            if(usingNewFunction) hash = hashF2(newStringHolder);
+            else hash = hashF1(newStringHolder);
+
+            if(hash == targetHash){
                 System.out.println("Collision found: " + newStringHolder);
                 collisions.add(newStringHolder);
             }
@@ -92,7 +96,7 @@ public class CT437_HashFunction1 {
         for (int i = 0; i < alphabet.length(); i++) {
             String newSequence;
             newSequence = newStringHolder + alphabet.charAt(i);
-            checkAllPermutationsOfLength(newSequence, length - 1, collisions, targetHash, collisionLimit, totalLimit);
+            checkAllPermutationsOfLength(newSequence, length - 1, collisions, targetHash, collisionLimit, totalLimit, usingNewFunction);
         }
     }
 
