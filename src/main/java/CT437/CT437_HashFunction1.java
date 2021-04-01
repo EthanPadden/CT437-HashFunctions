@@ -7,8 +7,17 @@ import java.util.ArrayList;
  * @author Michael Schukat
  */
 public class CT437_HashFunction1 {
+    /**
+     * The reason these are static member variables is just for readability
+     * They could be passed into the recursive function that checks the strings,
+     * but it would result in a lot of arguments making it hard to read.
+     * */
+    // String of possible characters
     static String alphabet = "abcdefghijklmnopqrstuvwxyABCDEFGHIJKLMNOPQURTUVWXYZ0123456789";
+    // List to hold collisions
     static ArrayList<String> collisions;
+    // Count for the number of strings checked before finding the total number of collisions
+    // Used to compare how many collisions for the hash functions
     static int numChecks;
 
     public static void main(String[] args) {
