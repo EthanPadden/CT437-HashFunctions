@@ -61,7 +61,7 @@ public class CT437_HashFunction1 {
                 System.out.println("Checking in order...");
                 for (int length = 1; length <= 64; length++) {
                     System.out.println("Checking all strings of length: " + length);
-                    checkAllStringsOfCertainLength("", length, targetHash, limitPerStringLength * length, totalLimit, true);
+                    checkAllStringsOfCertainLength("", length, targetHash, limitPerStringLength * length, totalLimit, false);
 
                     // Preventing the output from repeating
                     if (collisions.size() == totalLimit) {
@@ -81,7 +81,7 @@ public class CT437_HashFunction1 {
                     // Choose a random string length
                     int length = random.nextInt(64 - 1) + 1;
                     System.out.println("Checking all strings of length: " + length);
-                    checkAllStringsOfCertainLength("", length, targetHash, limitPerStringLength*i, totalLimit, true);
+                    checkAllStringsOfCertainLength("", length, targetHash, limitPerStringLength*i, totalLimit, false);
                 }
                 System.out.println("Total collisions found: " + collisions.size());
                 System.out.println("after " + numChecks + " strings checked.");
@@ -92,6 +92,19 @@ public class CT437_HashFunction1 {
         } 
     }
 
+    /**
+     * Check all permutations of strings of a given length:
+     *      "aa...a", "aa...b", ... , "99...9"
+     * Add it to the collections list if the result of hashing the string using the specified hash function
+     * results in the same hash value as the input string
+     * @param newStringHolder This is built within the function for recursion - this should be an empty string for the initial function call
+     * @param length the length of strings to check
+     * @param targetHash the hash value to check against
+     * @param collisionLimit the algorithm terminates after finding this many collisions
+     * @param totalLimit the algorithm terminates when the collisions list is of this size
+     * @param usingNewFunction true if we are using the enhanced function from problem 2,
+     *                         false if using the original function from problem 1
+     */
     private static void checkAllStringsOfCertainLength(String newStringHolder, int length, int targetHash, int collisionLimit, int totalLimit, boolean usingNewFunction)
     {
         /** Extra recursion base case
