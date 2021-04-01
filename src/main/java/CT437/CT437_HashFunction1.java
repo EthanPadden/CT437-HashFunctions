@@ -9,7 +9,7 @@ import java.util.ArrayList;
  */
 public class CT437_HashFunction1 {
     static String alphabet = "abcdefghijklmnopqrstuvwxyABCDEFGHIJKLMNOPQURTUVWXYZ0123456789";
-
+    static ArrayList<String> collisions;
 
     public static void main(String[] args) {
         int res = 0;
@@ -32,7 +32,7 @@ public class CT437_HashFunction1 {
                 System.out.println("Start searching for collisions");
                 /** Problem 1: Looking for collisions */
                 // Create a list to store the collisions
-                ArrayList<String> collisions = new ArrayList<String>();
+                collisions = new ArrayList<String>();
 
                 // This is the hash value for which we are trying to find collisions
                 int targetHash = hashF1(args[0]);
@@ -55,7 +55,7 @@ public class CT437_HashFunction1 {
                 // Iterate over different string lengths, from 1 to 64
                 for(int length = 1; length <= 64; length++) {
                     System.out.println("Checking all strings of length: " + length);
-                    checkAllPermutationsOfLength( "",  length, collisions, targetHash, limitPerStringLength*length, totalLimit, false);
+                    checkAllPermutationsOfLength( "",  length,  targetHash, limitPerStringLength*length, totalLimit, false);
                     System.out.println("Collisions found so far: " + collisions.size());
 
                     // Preventing the output from repeating
@@ -69,7 +69,7 @@ public class CT437_HashFunction1 {
         } 
     }
 
-    private static void checkAllPermutationsOfLength(String newStringHolder, int length, ArrayList<String> collisions, int targetHash, int collisionLimit, int totalLimit, boolean usingNewFunction)
+    private static void checkAllPermutationsOfLength(String newStringHolder, int length, int targetHash, int collisionLimit, int totalLimit, boolean usingNewFunction)
     {
         /** Extra recursion base case
          * collisionLimit = positive integer:
@@ -99,7 +99,7 @@ public class CT437_HashFunction1 {
         for (int i = 0; i < alphabet.length(); i++) {
             String newSequence;
             newSequence = newStringHolder + alphabet.charAt(i);
-            checkAllPermutationsOfLength(newSequence, length - 1, collisions, targetHash, collisionLimit, totalLimit, usingNewFunction);
+            checkAllPermutationsOfLength(newSequence, length - 1,  targetHash, collisionLimit, totalLimit, usingNewFunction);
         }
     }
 
