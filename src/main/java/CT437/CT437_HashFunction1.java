@@ -57,6 +57,9 @@ public class CT437_HashFunction1 {
                     System.out.println("Checking all strings of length: " + length);
                     checkAllPermutationsOfLength( "",  length, collisions, targetHash, limitPerStringLength*length, totalLimit, false);
                     System.out.println("Collisions found so far: " + collisions.size());
+
+                    // Preventing the output from repeating
+                    if(collisions.size() == totalLimit) break;
                 }
 
             }
