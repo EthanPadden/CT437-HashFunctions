@@ -20,6 +20,8 @@ public class CT437_HashFunction1 {
     // Count for the number of strings checked before finding the total number of collisions
     // Used to compare how many collisions for the hash functions
     static int numChecks;
+    // Count for the number of collisions found per string length
+    static int numCollisionsFound;
 
     public static void main(String[] args) {
         int res = 0;
@@ -47,6 +49,7 @@ public class CT437_HashFunction1 {
                 // #collisions of length 3 = 1962
                 // #collisions of length 4 = 121552
                 // Out of interest, this can be used to limit the number of collisions of each length
+                // If it finds no collisions for string length N, it will try to find more for length N+1
                 // If you do not want to use a limit, set this to -1
                 // This is used within the recursive function
                 int limitPerStringLength = 3;
@@ -55,13 +58,14 @@ public class CT437_HashFunction1 {
                 // This is to prevent a memory overflow
                 // If you do not want to use a limit, set this to -1
                 // This is used in the for loop below
-                int totalLimit = 20;
+                int totalLimit = 10;
 
                 // Iterate over different string lengths, from 1 to 64
                 System.out.println("Checking in order...");
                 for (int length = 1; length <= 64; length++) {
+                    numCollisionsFound = 0;
                     System.out.println("Checking all strings of length: " + length);
-                    checkAllStringsOfCertainLength("", length, targetHash, limitPerStringLength * length, totalLimit, false);
+                    checkAllStringsOfCertainLength("", length, targetHash, limitPerStringLength * length, totalLimit, true);
 
                     // Preventing the output from repeating
                     if (collisions.size() == totalLimit) {
@@ -78,6 +82,7 @@ public class CT437_HashFunction1 {
                 numChecks = 0;
                 limitPerStringLength = 1;
                 for(int i = 1; i <= totalLimit; i++) {
+                    numCollisionsFound = 0;
                     // Choose a random string length
                     int length = random.nextInt(64 - 1) + 1;
                     System.out.println("Checking all strings of length: " + length);
@@ -116,7 +121,7 @@ public class CT437_HashFunction1 {
          *      used if we do not want to set a limit
          *      collisions.size() can never be -1, so the condition is skipped
          * */
-        if (collisions.size() == collisionLimit || collisions.size() == totalLimit) {
+        if (numCollisionsFound == collisionLimit || collisions.size() == totalLimit) {
             return;
         }
         if (length == 0) {
@@ -131,6 +136,7 @@ public class CT437_HashFunction1 {
             if (hash == targetHash) {
                 System.out.println("Collision found: " + newStringHolder);
                 collisions.add(newStringHolder);
+                numCollisionsFound++;
             }
             return;
         }
